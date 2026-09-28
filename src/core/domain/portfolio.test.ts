@@ -7,6 +7,7 @@ import {
   portfolioValue,
   previousSnapshot,
   snapshotFromEdits,
+  sortSnapshots,
   UNCATEGORISED_ID,
 } from './portfolio'
 import type { Holding, Portfolio, Snapshot } from './types'
@@ -101,5 +102,13 @@ describe('allocation', () => {
   it('leaves out zero-valued holdings', () => {
     const slices = allocation(portfolio, snap('z', '2026-09-01T00:00:00Z', { a: 0, b: 10 }), 'g')
     expect(slices.map((x) => x.category.id)).toEqual(['stocks'])
+  })
+})
+
+describe('sortSnapshots', () => {
+  it('orders by instant even when UTC offsets differ', () => {
+    const imported = snap('imported', '2026-09-29T00:00:00+07:00', {}) // 28 Sep 17:00 UTC
+    const saved = snap('saved', '2026-09-28T17:35:00.000Z', {})
+    expect(sortSnapshots([saved, imported]).map((s) => s.id)).toEqual(['imported', 'saved'])
   })
 })

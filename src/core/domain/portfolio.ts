@@ -10,7 +10,8 @@ export interface Change {
 }
 
 export function sortSnapshots(snapshots: Snapshot[]): Snapshot[] {
-  return [...snapshots].sort((a, b) => a.takenAt.localeCompare(b.takenAt))
+  // Compare instants, not strings: timestamps may carry different UTC offsets.
+  return [...snapshots].sort((a, b) => Date.parse(a.takenAt) - Date.parse(b.takenAt))
 }
 
 export function latestSnapshot(portfolio: Portfolio): Snapshot | undefined {

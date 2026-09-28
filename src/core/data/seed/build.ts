@@ -51,7 +51,7 @@ export function buildPortfolio(input: SeedInput): Portfolio {
       const v = row.values[i]
       if (v !== null && v !== undefined) values[holdings[r].id] = v
     })
-    return { id: `s-seed-${i}`, takenAt, values }
+    return { id: `s-seed-${i}`, takenAt: new Date(takenAt).toISOString(), values }
   })
 
   return { groupings, categories, holdings, snapshots }
