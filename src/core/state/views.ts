@@ -95,6 +95,8 @@ export interface EditorRow {
   input: string
   /** Parsed input; null when empty or invalid. */
   value: number | null
+  /** What this holding will be saved as: the parsed input, else the value carried forward. */
+  effectiveValue: number
   invalid: boolean
   /** Edited to something different from the starting value. */
   changed: boolean
@@ -139,6 +141,7 @@ export function useSnapshotEditor(snapshotId?: Id) {
             holding,
             input,
             value,
+            effectiveValue: current,
             invalid,
             changed: edited !== undefined && value !== null && value !== baseValue,
             closed: isClosed(holding, base),
@@ -151,7 +154,7 @@ export function useSnapshotEditor(snapshotId?: Id) {
   const visibleRows = showClosed ? rows : rows.filter((r) => !r.closed || r.changed)
   const dirty = rows.some((r) => r.changed)
   const invalid = rows.some((r) => r.invalid)
-  const total = rows.reduce((sum, r) => sum + (r.value ?? 0), 0)
+  const total = rows.reduce((sum, r) => sum + r.effectiveValue, 0)
 
   const setInput = useCallback((holdingId: Id, text: string) => {
     setEdits((e) => ({ ...e, [holdingId]: text }))
