@@ -50,7 +50,7 @@ export function ValueHistoryChart({ points, theme, height = 220 }: Props) {
           tick={tick}
           tickLine={false}
           axisLine={false}
-          width={56}
+          width={60}
         />
         <Tooltip
           cursor={{ stroke: theme.grid }}

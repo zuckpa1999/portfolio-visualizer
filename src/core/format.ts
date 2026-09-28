@@ -9,9 +9,9 @@ export function formatTHB(value: number): string {
   return `฿${baht.format(Math.round(value))}`
 }
 
+/** Axis labels: "฿2,045k". Thousands keep neighbouring ticks distinct for a portfolio that moves by small amounts. */
 export function formatCompactTHB(value: number): string {
-  if (Math.abs(value) >= 1_000_000) return `฿${(value / 1_000_000).toFixed(2)}M`
-  if (Math.abs(value) >= 1_000) return `฿${Math.round(value / 1_000)}k`
+  if (Math.abs(value) >= 10_000) return `฿${baht.format(Math.round(value / 1_000))}k`
   return formatTHB(value)
 }
 
@@ -26,11 +26,17 @@ export function formatSignedTHB(amount: number): string {
 
 export function formatChange(c: Change | null): string {
   if (!c) return '—'
+  if (c.amount === 0) return 'No change'
   const pct = c.percent === null ? '' : ` (${c.percent > 0 ? '+' : c.percent < 0 ? '−' : ''}${percent.format(Math.abs(c.percent))})`
   return `${formatSignedTHB(c.amount)}${pct}`
 }
 
 export type Trend = 'up' | 'down' | 'flat' | 'none'
+
+/** True when there is a non-zero change worth showing. */
+export function hasChange(c: Change | null): c is Change {
+  return c !== null && c.amount !== 0
+}
 
 export function trendOf(c: Change | null): Trend {
   if (!c) return 'none'
