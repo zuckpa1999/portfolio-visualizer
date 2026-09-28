@@ -1,9 +1,30 @@
-// Placeholder. Each UI candidate lives on its own branch: ui/shadcn, ui/mantine, ui/mui.
+import '../index.css'
+import { PortfolioProvider } from '@/core/state/PortfolioProvider'
+import { useSession } from '@/core/state/useSession'
+import { Button } from '@/components/ui/button'
+import { Shell } from './Shell'
+
 export function App() {
+  const session = useSession()
+
+  if (session.status === 'checking') return null
+  if (session.status === 'signed-out') {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center gap-6 p-6 text-center">
+        <div className="space-y-1">
+          <h1 className="text-xl font-semibold tracking-tight">Portfolio</h1>
+          <p className="text-sm text-muted-foreground">Sign in to see your portfolio.</p>
+        </div>
+        <Button size="lg" onClick={() => session.signIn()}>
+          Continue with Google
+        </Button>
+      </main>
+    )
+  }
+
   return (
-    <main style={{ fontFamily: 'system-ui', padding: 24 }}>
-      <h1>Portfolio Visualizer</h1>
-      <p>Check out a UI branch: <code>ui/shadcn</code>, <code>ui/mantine</code> or <code>ui/mui</code>.</p>
-    </main>
+    <PortfolioProvider>
+      <Shell session={session} />
+    </PortfolioProvider>
   )
 }
