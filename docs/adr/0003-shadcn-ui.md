@@ -1,0 +1,3 @@
+# shadcn/ui + Tailwind for the UI
+
+The top requirement for the UI was a clean, minimal look on iPhone and iPad. We built the full v1 three times on the same shared core and compared them on real devices: `ui/shadcn`, `ui/mantine` and `ui/mui` (those branches are kept for reference). We chose shadcn/ui. It is the plainest by default, its components are copied into the repo so there's no theme to fight, and it has the smallest bundle (~236 KB gzipped JS, against 255 KB for Mantine and 268 KB for MUI). MUI needed heavy theming to look minimal, and v9 moves styling props into `sx`, which is more verbose.

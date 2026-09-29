@@ -3,13 +3,12 @@
 Record your portfolio's value from your phone, see how it's split across categories, and see whether it's up or down.
 Vocabulary is defined in [CONTEXT.md](./CONTEXT.md); decisions are recorded in [docs/adr](./docs/adr).
 
-## Branches
+## Structure
 
-`main` holds the parts every UI shares (`src/core`). Each UI candidate lives on its own branch:
+- `src/core`: domain logic, storage (local + Supabase), charts and view-model hooks, independent of any UI library
+- `src/ui` + `src/components/ui`: the screens, built with shadcn/ui + Tailwind (see [ADR 0003](./docs/adr/0003-shadcn-ui.md))
 
-- `ui/shadcn`: shadcn/ui + Tailwind
-- `ui/mantine`: Mantine
-- `ui/mui`: MUI
+The alternative UI prototypes are kept on the `ui/mantine` and `ui/mui` branches.
 
 ## Run
 
