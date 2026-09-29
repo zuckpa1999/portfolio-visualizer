@@ -1,51 +1,50 @@
 import { useEffect, useState } from 'react'
 import './splash.css'
-import { cn } from '@/lib/utils'
-import { SPLASH_VARIANTS } from './registry'
-import { useSplashData } from './splashData'
+import { usePortfolio } from '@/core/state/PortfolioProvider'
+import { useOverview, useSelectedGrouping } from '@/core/state/views'
+import { Aperture } from './Aperture'
 
+const HOLD_MS = 2300
 const EXIT_MS = 450
 const reduceMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
-interface Props {
-  variantId: string
-  onDone?(): void
-  /** Fill the parent instead of the viewport (gallery). */
-  contained?: boolean
-}
-
 /**
- * Plays once the portfolio has loaded, holds for the variant's duration, then fades out.
- * Tapping skips ahead. Loading time counts towards the duration, so a slow backend never adds to it.
+ * Plays once the portfolio has loaded, holds, then fades out. Tapping skips ahead.
+ * Loading time counts towards the hold, so a slow backend never makes it longer.
  */
-export function Splash({ variantId, onDone, contained }: Props) {
-  const { ready, data } = useSplashData()
-  const variant = SPLASH_VARIANTS.find((v) => v.id === variantId) ?? SPLASH_VARIANTS[0]
+export function Splash({ onDone }: { onDone(): void }) {
+  const { status } = usePortfolio()
+  const [groupingId] = useSelectedGrouping()
+  const { total, slices } = useOverview(groupingId)
+  const ready = status !== 'loading'
   const [mountedAt] = useState(() => performance.now())
   const [leaving, setLeaving] = useState(false)
 
   useEffect(() => {
     if (!ready || leaving) return
-    const hold = reduceMotion() ? 500 : variant.duration
-    const remaining = Math.max(0, hold - (performance.now() - mountedAt))
-    const id = setTimeout(() => setLeaving(true), remaining)
+    const hold = reduceMotion() ? 500 : HOLD_MS
+    const id = setTimeout(() => setLeaving(true), Math.max(0, hold - (performance.now() - mountedAt)))
     return () => clearTimeout(id)
-  }, [ready, leaving, variant.duration, mountedAt])
+  }, [ready, leaving, mountedAt])
 
   useEffect(() => {
-    if (!leaving || !onDone) return
+    if (!leaving) return
     const id = setTimeout(onDone, EXIT_MS)
     return () => clearTimeout(id)
   }, [leaving, onDone])
 
   return (
     <div
-      className={cn('splash z-50 flex items-center justify-center', contained ? 'absolute inset-0' : 'fixed inset-0')}
+      className="splash fixed inset-0 z-50 flex items-center justify-center"
       data-leaving={leaving || undefined}
       onClick={() => ready && setLeaving(true)}
       aria-hidden
     >
-      <div className="splash-stage">{ready && <variant.Component data={data} />}</div>
+      <div className="splash-stage">
+        {ready && (
+          <Aperture total={total} slices={slices.map((s) => ({ id: s.category.id, color: s.category.color, share: s.share }))} />
+        )}
+      </div>
     </div>
   )
 }

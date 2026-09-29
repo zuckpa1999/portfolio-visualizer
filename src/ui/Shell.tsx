@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { ChartPie, History, PencilLine, X } from 'lucide-react'
 import { usePortfolio } from '@/core/state/PortfolioProvider'
 import type { useSession } from '@/core/state/useSession'
 import { cn } from '@/lib/utils'
 import { HistoryScreen } from './HistoryScreen'
 import { Splash } from './splash/Splash'
-import { chosenSplashId } from './splash/splashData'
 import { OverviewScreen } from './OverviewScreen'
 import { SettingsScreen } from './SettingsScreen'
 import { UpdateScreen } from './UpdateScreen'
@@ -21,12 +20,12 @@ const TABS: { id: Tab; label: string; icon: typeof ChartPie }[] = [
 export function Shell({ session }: { session: ReturnType<typeof useSession> }) {
   const { status } = usePortfolio()
   const [splashDone, setSplashDone] = useState(false)
-  const [splashId] = useState(chosenSplashId)
+  const finishSplash = useCallback(() => setSplashDone(true), [])
 
   return (
     <>
       {/* Same tree position while loading and after, so the splash isn't remounted (and restarted). */}
-      {!splashDone && <Splash variantId={splashId} onDone={() => setSplashDone(true)} />}
+      {!splashDone && <Splash onDone={finishSplash} />}
       {status !== 'loading' && <Screens session={session} />}
     </>
   )
