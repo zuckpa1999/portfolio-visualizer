@@ -3,6 +3,9 @@ import { PortfolioProvider } from '@/core/state/PortfolioProvider'
 import { useSession } from '@/core/state/useSession'
 import { Button } from '@/components/ui/button'
 import { Shell } from './Shell'
+import { SplashGallery } from './splash/SplashGallery'
+
+const showSplashGallery = import.meta.env.DEV && new URLSearchParams(window.location.search).has('splash-gallery')
 
 export function App() {
   const session = useSession()
@@ -24,7 +27,7 @@ export function App() {
 
   return (
     <PortfolioProvider>
-      <Shell session={session} />
+      {showSplashGallery ? <SplashGallery /> : <Shell session={session} />}
     </PortfolioProvider>
   )
 }

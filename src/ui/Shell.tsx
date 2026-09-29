@@ -4,6 +4,8 @@ import { usePortfolio } from '@/core/state/PortfolioProvider'
 import type { useSession } from '@/core/state/useSession'
 import { cn } from '@/lib/utils'
 import { HistoryScreen } from './HistoryScreen'
+import { Splash } from './splash/Splash'
+import { chosenSplashId } from './splash/splashData'
 import { OverviewScreen } from './OverviewScreen'
 import { SettingsScreen } from './SettingsScreen'
 import { UpdateScreen } from './UpdateScreen'
@@ -17,11 +19,23 @@ const TABS: { id: Tab; label: string; icon: typeof ChartPie }[] = [
 ]
 
 export function Shell({ session }: { session: ReturnType<typeof useSession> }) {
-  const { status, error, dismissError } = usePortfolio()
+  const { status } = usePortfolio()
+  const [splashDone, setSplashDone] = useState(false)
+  const [splashId] = useState(chosenSplashId)
+
+  return (
+    <>
+      {/* Same tree position while loading and after, so the splash isn't remounted (and restarted). */}
+      {!splashDone && <Splash variantId={splashId} onDone={() => setSplashDone(true)} />}
+      {status !== 'loading' && <Screens session={session} />}
+    </>
+  )
+}
+
+function Screens({ session }: { session: ReturnType<typeof useSession> }) {
+  const { error, dismissError } = usePortfolio()
   const [tab, setTab] = useState<Tab>('overview')
   const [settingsOpen, setSettingsOpen] = useState(false)
-
-  if (status === 'loading') return null
 
   return (
     <div className="pt-safe mx-auto min-h-dvh max-w-md pb-24 md:max-w-3xl">
