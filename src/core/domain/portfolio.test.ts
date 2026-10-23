@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   allocation,
+  categoryValue,
   change,
   isClosed,
   monthlyBaseline,
@@ -9,6 +10,7 @@ import {
   snapshotFromEdits,
   sortSnapshots,
   UNCATEGORISED_ID,
+  valueHistory,
 } from './portfolio'
 import type { Holding, Portfolio, Snapshot } from './types'
 
@@ -75,6 +77,15 @@ describe('comparisons', () => {
     expect(monthlyBaseline(snapshots, snapshots[2])?.id).toBe('aug-b')
     expect(monthlyBaseline(snapshots, snapshots[1])).toBeUndefined()
   })
+
+  it('monthly baseline for January is the last snapshot of the previous December', () => {
+    const yearEnd = [
+      snap('dec-a', '2026-12-05T09:00:00', { a: 1 }),
+      snap('dec-b', '2026-12-28T09:00:00', { a: 2 }),
+      snap('jan-a', '2027-01-04T09:00:00', { a: 3 }),
+    ]
+    expect(monthlyBaseline(yearEnd, yearEnd[2])?.id).toBe('dec-b')
+  })
 })
 
 describe('allocation', () => {
@@ -103,6 +114,30 @@ describe('allocation', () => {
     const slices = allocation(portfolio, snap('z', '2026-09-01T00:00:00Z', { a: 0, b: 10 }), 'g')
     expect(slices.map((x) => x.category.id)).toEqual(['stocks'])
   })
+
+  it('counts a holding as Uncategorised when its category belongs to another grouping', () => {
+    const mixedUp: Portfolio = {
+      ...portfolio,
+      categories: [...portfolio.categories, { id: 'usd', groupingId: 'other', name: 'USD', color: '#222' }],
+      holdings: [holding('a', { g: 'usd' })],
+    }
+    const slices = allocation(mixedUp, snap('m', '2026-09-01T00:00:00Z', { a: 100 }), 'g')
+    expect(slices.map((x) => [x.category.id, x.value])).toEqual([[UNCATEGORISED_ID, 100]])
+  })
+
+  it('lists the holdings inside a category largest first', () => {
+    const stocks = allocation(portfolio, snap('o', '2026-09-01T00:00:00Z', { b: 50, c: 80 }), 'g')[0]
+    expect(stocks.holdings.map((x) => [x.holding.id, x.value])).toEqual([
+      ['c', 80],
+      ['b', 50],
+    ])
+  })
+
+  it('totals one category, and is zero without a snapshot', () => {
+    expect(categoryValue(portfolio, s, 'g', 'stocks')).toBe(300)
+    expect(categoryValue(portfolio, s, 'g', UNCATEGORISED_ID)).toBe(100)
+    expect(categoryValue(portfolio, undefined, 'g', 'stocks')).toBe(0)
+  })
 })
 
 describe('sortSnapshots', () => {
@@ -110,5 +145,20 @@ describe('sortSnapshots', () => {
     const imported = snap('imported', '2026-09-29T00:00:00+07:00', {}) // 28 Sep 17:00 UTC
     const saved = snap('saved', '2026-09-28T17:35:00.000Z', {})
     expect(sortSnapshots([saved, imported]).map((s) => s.id)).toEqual(['imported', 'saved'])
+  })
+})
+
+describe('valueHistory', () => {
+  it('gives each snapshot its portfolio value and its change vs the previous snapshot', () => {
+    const history = valueHistory([
+      snap('s1', '2026-09-01T00:00:00Z', { a: 100, b: 100 }),
+      snap('s2', '2026-09-08T00:00:00Z', { a: 150, b: 100 }),
+      snap('s3', '2026-09-15T00:00:00Z', { a: 50, b: 75 }),
+    ])
+    expect(history.map((p) => [p.snapshot.id, p.value, p.vsPrevious])).toEqual([
+      ['s1', 200, null],
+      ['s2', 250, { amount: 50, percent: 0.25 }],
+      ['s3', 125, { amount: -125, percent: -0.5 }],
+    ])
   })
 })
