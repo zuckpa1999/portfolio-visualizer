@@ -5,7 +5,7 @@ import { seedPortfolio } from './seed'
 
 const KEY = 'portfolio-visualizer.data.v1'
 
-/** Stores the whole portfolio in this browser's localStorage. For trying the app before Supabase is set up. */
+/** Stores the whole portfolio in this browser's localStorage. For trying the app before Firebase is set up. */
 export class LocalRepository implements PortfolioRepository {
   private read(): Portfolio {
     try {

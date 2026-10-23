@@ -1,3 +1,7 @@
+---
+status: superseded by ADR-0004
+---
+
 # Supabase is the source of truth, not the Google Sheet
 
 The portfolio used to live in a Google Sheet. The app instead stores its data in Supabase (Postgres plus Google sign-in, locked down with row-level security) and talks to it directly from the React front end, with no backend of our own. The Sheet is imported once and then no longer used.

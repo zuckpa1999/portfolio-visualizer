@@ -5,7 +5,7 @@ Vocabulary is defined in [CONTEXT.md](./CONTEXT.md); decisions are recorded in [
 
 ## Structure
 
-- `src/core`: domain logic, storage (local + Supabase), charts and view-model hooks, independent of any UI library
+- `src/core`: domain logic, storage (local + Firestore), charts and view-model hooks, independent of any UI library
 - `src/ui` + `src/components/ui`: the screens, built with shadcn/ui + Tailwind (see [ADR 0003](./docs/adr/0003-shadcn-ui.md))
 
 The alternative UI prototypes are kept on the `ui/mantine` and `ui/mui` branches.
@@ -24,10 +24,11 @@ Without configuration, data is kept in this browser's localStorage and starts fr
 `src/core/data/seed/my-portfolio.ts` (your real sheet data, **git-ignored**) or the fictional `example.ts`.
 To start over from the seed, run `localStorage.clear()` in the browser console.
 
-### Switching to Supabase
+### Switching to Firestore
 
-1. Create a Supabase project and run `supabase/schema.sql` in its SQL editor.
-2. Enable the Google provider (Authentication → Providers) and add your site URL to the redirect URLs.
-3. Copy `.env.example` to `.env.local` and fill in the project URL and anon key.
+1. Create a Firebase project, add a Web app, and create a Firestore database.
+2. Enable Google sign-in (Authentication → Sign-in method) and add the domain you serve the app from to the authorised domains.
+3. Publish `firestore.rules`: paste it into Firestore → Rules, or run `npx firebase-tools deploy --only firestore:rules`.
+4. Copy `.env.example` to `.env.local` and fill in the values from Project settings → Your apps.
 
-The first sign-in to an empty account imports the seed.
+The first sign-in to an empty account imports the seed. See [ADR 0004](./docs/adr/0004-firestore-instead-of-supabase.md) for why Firestore.

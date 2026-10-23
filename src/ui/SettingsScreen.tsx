@@ -319,7 +319,7 @@ function AccountSettings({ session }: { session: ReturnType<typeof useSession> }
     <div className="space-y-3 px-4">
       <div className="rounded-xl border bg-background px-4 py-3 text-sm">
         <p className="text-muted-foreground">Data is stored in</p>
-        <p className="font-medium">{backendKind === 'supabase' ? `Supabase · ${session.email ?? ''}` : 'This browser only'}</p>
+        <p className="font-medium">{backendKind === 'firestore' ? `Firestore · ${session.email ?? ''}` : 'This browser only'}</p>
       </div>
       {session.canSignOut ? (
         <Button variant="outline" className="h-10 w-full" onClick={() => session.signOut()}>
